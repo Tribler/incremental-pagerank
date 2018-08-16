@@ -54,17 +54,16 @@ class IncrementalPersonalizedPageRank(object):
 
     def initial_random_walks(self):
         """
-        Iterates the random_walk_from_node function starting from the seed node, number_of_random_walks times
-        :return: A dictionary comprising the number of occurrences of each node of the graph in the random walks
+        Initiates the random_walk_from_node function starting from the seed node, number_of_random_walks times
         """
         while len(self.random_walks) < self.number_of_random_walks:
             self.regular_random_walk(self.node)
+        return
 
     def regular_random_walk(self, node):
         """
-        Computes a random walk containing all nodes it passes through as a list
-        :param node: The node at which the random walks begin
-        :return: Appends the list of traversed nodes to the existing list called random_walks
+        Computes a random walk starting from node and appending all nodes it passes though to the list random_walk
+        :param node: The node at which the random walk begins
         """
         random_walk = [node]
         while len(random_walk) < self.random_walk_length:
@@ -86,6 +85,7 @@ class IncrementalPersonalizedPageRank(object):
             else:
                 random_walk.append(self.node)
         self.random_walks.append(random_walk)
+        return
 
     def add_random_walk(self, previous_random_walk):
         """
@@ -93,7 +93,6 @@ class IncrementalPersonalizedPageRank(object):
         node in the previous random walk. The idea is that once the graph is modified some random walks will be
         recomputed starting at a given node in the graph.
         :param previous_random_walk: A random walk segment which is not as long as random_walk_length
-        :return: Appends the computed random walk to the list random_walks
         """
         random_walk = previous_random_walk
         while len(random_walk) < self.random_walk_length:
@@ -115,11 +114,12 @@ class IncrementalPersonalizedPageRank(object):
             else:
                 random_walk.append(self.node)
         self.random_walks.append(random_walk)
+        return
 
     def compute_personalized_page_ranks(self):
         """
         Determines the personalized page ranks based the random walks in the list random_walks
-        :return: A dictionary of nodes and corresponding pageranks
+        :return: A dictionary of nodes and corresponding page ranks
         """
         zeros = [0 for _ in range(len(list(self.graph.nodes)))]
         page_ranks = dict(zip(list(self.graph.nodes), zeros))
@@ -142,12 +142,11 @@ class IncrementalPersonalizedPageRank(object):
         :param source: source node
         :param destination: destination node
         :param weight: weight of the edge
-        :return:
         """
         if self.graph.has_edge(source, destination):
             self.add_weight_to_edge(source, destination, weight)
         elif self.graph.has_edge(destination, source):
-            self.add_weight_to_edge(destination, source, weight)
+            self.add_weight_to_edge(destination, source, -weight)
         else:
             if weight > 0:
                 edge = (source, destination, weight)
@@ -161,8 +160,7 @@ class IncrementalPersonalizedPageRank(object):
         Takes an existing edge and updates its weight. Then adds the edge to the list added_edges
         :param source: source node of the edge
         :param destination: destination node of the edge
-        :param weight: weight of the edge
-        :return: Updates the graph
+        :param weight: weight added to the edge
         """
         if self.graph.has_edge(source, destination):
             self.graph[source][destination]['weight'] += weight
@@ -198,7 +196,7 @@ class IncrementalPersonalizedPageRank(object):
                 self.graph.remove_edge(destination, source)
                 self.removed_edges.append((destination, source))
         else:
-            print "No such edge exists"
+            self.add_edge(source, destination, weight)
         return
 
     def remove_edge(self, source, destination):
@@ -217,6 +215,7 @@ class IncrementalPersonalizedPageRank(object):
             self.removed_edges.append(edge)
         else:
             print "Edge not in Graph"
+        return
 
     def add_node(self, node):
         """
@@ -227,6 +226,7 @@ class IncrementalPersonalizedPageRank(object):
             self.graph.add_node(node)
         else:
             print "node already in graph"
+        return
 
     def remove_node(self, node):
         """
@@ -239,13 +239,13 @@ class IncrementalPersonalizedPageRank(object):
             self.graph.remove_node(node)
         else:
             print "node not in graph"
+        return
 
     def update_random_walks(self):
         """
-        Takes the added and removed edges in the graph and recomputes the random walks starting from their
-        respective source nodes. The new random walks then replace the old ones in the list random_walks. Finally the
-        edges are removed from the lists added_edges and removed_edges
-        removes the added edges from the list
+        Takes the lists added_edges and removed_edges and recomputes all random walks that have traversed these
+        edges, starting from their respective source nodes. The new random walks then replace the old ones in the
+        list random_walks. Finally the edges are removed from the lists added_edges and removed_edges
         """
         for edge in reversed(self.added_edges):
             self.added_edges.remove(edge)
