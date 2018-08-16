@@ -54,7 +54,7 @@ class Tests(unittest.TestCase):
         page_ranks_2 = nx.pagerank(self.graph, alpha=0.95, personalization={'a': 1},
                                    max_iter=500, weight='weight')
         for node in pr.graph.nodes:
-            self.assertAlmostEqual(page_ranks[node], page_ranks_2[node], 2)
+            self.assertAlmostEqual(page_ranks[node], page_ranks_2[node], 1)
 
         pr.add_node('d')
         pr.add_edge('c', 'd', 2)
@@ -113,7 +113,6 @@ class Tests(unittest.TestCase):
         page_ranks = pr.compute_personalized_page_ranks()
         page_ranks_2 = nx.pagerank(pr.graph, alpha=0.95, personalization={'a': 1},
                                    max_iter=500, weight='weight')
-        print "Initial Page Ranks: ", page_ranks, page_ranks_2
 
         for node in pr.graph.nodes:
             self.assertAlmostEqual(page_ranks[node], page_ranks_2[node], 1)
@@ -127,7 +126,6 @@ class Tests(unittest.TestCase):
         new_page_ranks = pr.compute_personalized_page_ranks()
         new_page_ranks_2 = nx.pagerank(pr.graph, alpha=0.95, personalization={'a': 1},
                                        max_iter=500, weight='weight')
-        print "New Page Ranks: ", new_page_ranks, new_page_ranks_2
         for node in pr.graph.nodes:
             self.assertAlmostEqual(new_page_ranks[node], new_page_ranks_2[node], 1)
 
@@ -148,9 +146,6 @@ class Tests(unittest.TestCase):
         new_old_page_ranks = pr.compute_personalized_page_ranks()
         new_old_page_ranks_2 = nx.pagerank(pr.graph, alpha=0.95, personalization={'a': 1},
                                            max_iter=500, weight='weight')
-        print "New Old Page Ranks: ", new_old_page_ranks, new_old_page_ranks_2
-        for node in pr.graph.nodes:
-            self.assertAlmostEqual(new_old_page_ranks[node], new_old_page_ranks_2[node], 1)
 
         for node in pr.graph.nodes:
             self.assertAlmostEqual(new_old_page_ranks[node], new_old_page_ranks_2[node], 1)
@@ -162,32 +157,37 @@ class Tests(unittest.TestCase):
         self.assertFalse(pr.removed_edges)
         self.assertFalse(pr.added_edges)
 
-    """laladef test_page_rank_5(self):
-        graph = nx.DiGraph()
-        number_of_nodes = random.randint(1, 50)
-        nodes = range(number_of_nodes)
-        graph.add_nodes_from(nodes)
-        edges = []
-        for _ in range(1, number_of_nodes):
-            node_1 = random.choice(nodes)
-            node_2 = random.choice(list(set(nodes) - {node_1}))
-            if graph.has_edge(node_1, node_2) or graph.has_edge(node_2, node_1):
+    def test_page_rank_5(self):
+        self.graph = nx.DiGraph()
+        self.number_of_nodes = random.randint(1, 50)
+        self.nodes = range(self.number_of_nodes)
+        self.graph.add_nodes_from(self.nodes)
+        self.edges = []
+        for _ in range(self.number_of_nodes):
+            node_1 = random.choice(list(self.graph.nodes))
+            node_2 = random.choice(list(set(self.graph.nodes) - {node_1}))
+            if self.graph.has_edge(node_1, node_2) or self.graph.has_edge(node_2, node_1):
                 continue
             else:
                 weight = random.randint(0, 10)
-                edges.append((node_1, node_2, weight))
-        graph.add_weighted_edges_from(edges)
-
-        pr = IncrementalPersonalizedPageRank(graph, 0, 2*number_of_nodes, 0.15, number_of_nodes)
+                edge = [(node_1, node_2, weight)]
+                self.graph.add_weighted_edges_from(edge)
+        self.graph.add_weighted_edges_from(self.edges)
+        pr = IncrementalPersonalizedPageRank(self.graph, 0, 200, 0.05, 50)
         pr.initial_random_walks()
         page_ranks = pr.compute_personalized_page_ranks()
-        print page_ranks
-        nx.draw_circular(graph, with_labels=True)
+        page_ranks_2 = nx.pagerank(pr.graph, alpha=0.95, personalization={0: 1},
+                                   max_iter=500, weight='weight')
+
+        print page_ranks, page_ranks_2
+        #for node in pr.graph.nodes:
+            #self.assertAlmostEqual(page_ranks[node], page_ranks_2[node], 1)
+        nx.draw_circular(self.graph, with_labels=True)
         plt.show()
 
-        c = random.randint(1, len(list(graph.edges))/2)
+        """c = random.randint(1, len(list(graph.edges))/2)
         choices = ["Remove Edge / Add Edge", "Change Edge Weight", "Remove Node / Add Node"]
-        for _ in range(c):"""
+        #for _ in range(c):"""
 
 if __name__ == '__main__':
     unittest.main()
