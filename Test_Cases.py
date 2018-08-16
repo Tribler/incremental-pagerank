@@ -22,9 +22,8 @@ class Tests(unittest.TestCase):
         pr = IncrementalPersonalizedPageRank(self.graph, 'a', 200, 0.05, 100)
         pr.initial_random_walks()
         page_ranks = pr.compute_personalized_page_ranks()
-        page_ranks_2 = nx.pagerank(self.graph, alpha=0.95, personalization={'a': 1, 'b': 0, 'c': 0},
+        page_ranks_2 = nx.pagerank(self.graph, alpha=0.95, personalization={'a': 1},
                                    max_iter=500, weight='weight')
-        print "PAGE RANKS: ", page_ranks, page_ranks_2
         self.assertTrue('a' in page_ranks)
         self.assertTrue('b' in page_ranks)
         self.assertTrue('c' in page_ranks)
@@ -52,8 +51,11 @@ class Tests(unittest.TestCase):
         pr = IncrementalPersonalizedPageRank(self.graph, 'a', 200, 0.05, 100)
         pr.initial_random_walks()
         page_ranks = pr.compute_personalized_page_ranks()
-        page_ranks_2 = nx.pagerank(self.graph, alpha=0.95, personalization={'a': 1, 'b': 0, 'c': 0},
+        page_ranks_2 = nx.pagerank(self.graph, alpha=0.95, personalization={'a': 1},
                                    max_iter=500, weight='weight')
+        for node in pr.graph.nodes:
+            self.assertAlmostEqual(page_ranks[node], page_ranks_2[node], 2)
+
         pr.add_node('d')
         pr.add_edge('c', 'd', 2)
         pr.remove_edge('a', 'b')
@@ -73,9 +75,8 @@ class Tests(unittest.TestCase):
 
         pr.update_random_walks()
         new_page_ranks = pr.compute_personalized_page_ranks()
-        new_page_ranks_2 = nx.pagerank(self.graph, alpha=0.95, personalization={'a': 1, 'b': 0, 'c': 0},
+        new_page_ranks_2 = nx.pagerank(pr.graph, alpha=0.95, personalization={'a': 1},
                                        max_iter=500, weight='weight')
-
         self.assertFalse(pr.removed_edges)
         self.assertFalse(pr.added_edges)
         self.assertFalse('b' in new_page_ranks)
@@ -85,13 +86,15 @@ class Tests(unittest.TestCase):
         self.assertEqual(len(pr.random_walks), 200)
         for walk in pr.random_walks:
             self.assertEqual(len(walk), 100)
+        for node in self.graph.nodes:
+            self.assertAlmostEqual(new_page_ranks[node], new_page_ranks_2[node], 2)
 
     def test_page_rank_3(self):
         """
         We test a personalized page rank on an empty graph
         """
         self.graph = nx.DiGraph()
-        pr = IncrementalPersonalizedPageRank(self.graph, None, 50, 0.05, 10)
+        pr = IncrementalPersonalizedPageRank(self.graph, None, 200, 0.05, 50)
         page_ranks = pr.compute_personalized_page_ranks()
         self.assertEqual(page_ranks, {})
 
@@ -105,12 +108,15 @@ class Tests(unittest.TestCase):
         self.graph.add_nodes_from(self.nodes)
         self.graph.add_weighted_edges_from(self.edges)
 
-        pr = IncrementalPersonalizedPageRank(self.graph, 'a', 50, 0, 15)
+        pr = IncrementalPersonalizedPageRank(self.graph, 'a', 200, 0.05, 50)
         pr.initial_random_walks()
         page_ranks = pr.compute_personalized_page_ranks()
-        page_ranks_2 = nx.pagerank(self.graph, alpha=0.95, personalization={'a': 1, 'b': 0, 'c': 0},
+        page_ranks_2 = nx.pagerank(pr.graph, alpha=0.95, personalization={'a': 1},
                                    max_iter=500, weight='weight')
         print "Initial Page Ranks: ", page_ranks, page_ranks_2
+
+        for node in pr.graph.nodes:
+            self.assertAlmostEqual(page_ranks[node], page_ranks_2[node], 1)
 
         pr.add_weight_to_edge('c', 'a', 3)
         pr.remove_node('f')
@@ -119,9 +125,11 @@ class Tests(unittest.TestCase):
         pr.add_weight_to_edge('e', 'b', 3)
         pr.update_random_walks()
         new_page_ranks = pr.compute_personalized_page_ranks()
-        new_page_ranks_2 = nx.pagerank(self.graph, alpha=0.95, personalization={'a': 1, 'b': 0, 'c': 0},
-                                   max_iter=500, weight='weight')
-        print "New Initial Page Ranks: ", new_page_ranks
+        new_page_ranks_2 = nx.pagerank(pr.graph, alpha=0.95, personalization={'a': 1},
+                                       max_iter=500, weight='weight')
+        print "New Page Ranks: ", new_page_ranks, new_page_ranks_2
+        for node in pr.graph.nodes:
+            self.assertAlmostEqual(new_page_ranks[node], new_page_ranks_2[node], 1)
 
         self.assertFalse(pr.graph.has_edge('a', 'c'))
         self.assertFalse(pr.graph.has_edge('c', 'a'))
@@ -138,7 +146,14 @@ class Tests(unittest.TestCase):
 
         pr.update_random_walks()
         new_old_page_ranks = pr.compute_personalized_page_ranks()
+        new_old_page_ranks_2 = nx.pagerank(pr.graph, alpha=0.95, personalization={'a': 1},
+                                           max_iter=500, weight='weight')
+        print "New Old Page Ranks: ", new_old_page_ranks, new_old_page_ranks_2
+        for node in pr.graph.nodes:
+            self.assertAlmostEqual(new_old_page_ranks[node], new_old_page_ranks_2[node], 1)
 
+        for node in pr.graph.nodes:
+            self.assertAlmostEqual(new_old_page_ranks[node], new_old_page_ranks_2[node], 1)
         self.assertEqual(pr.graph.nodes, self.graph.nodes)
         self.assertEqual(pr.graph.edges, self.graph.edges)
         self.assertEqual(page_ranks.keys(), new_old_page_ranks.keys())
@@ -147,7 +162,7 @@ class Tests(unittest.TestCase):
         self.assertFalse(pr.removed_edges)
         self.assertFalse(pr.added_edges)
 
-    """def test_page_rank_5(self):
+    """laladef test_page_rank_5(self):
         graph = nx.DiGraph()
         number_of_nodes = random.randint(1, 50)
         nodes = range(number_of_nodes)
@@ -173,7 +188,6 @@ class Tests(unittest.TestCase):
         c = random.randint(1, len(list(graph.edges))/2)
         choices = ["Remove Edge / Add Edge", "Change Edge Weight", "Remove Node / Add Node"]
         for _ in range(c):"""
-
 
 if __name__ == '__main__':
     unittest.main()
