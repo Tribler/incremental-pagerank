@@ -33,7 +33,7 @@ class IncrementalPersonalizedPageRank(object):
 
     def __init__(self, graph, node, number_of_random_walks, reset_probability, random_walk_length):
         """
-        Initializes the incremental personalized pagerank class by determining the graph, the seed node, the number
+        Initializes the incremental personalized page rank class by determining the graph, the seed node, the number
         of random walks, the reset probability and the length of each random walk.
 
         :type node: The seed node at which all random walks begin
@@ -143,6 +143,8 @@ class IncrementalPersonalizedPageRank(object):
         :param destination: destination node
         :param weight: weight of the edge
         """
+        if weight == 0:
+            return
         if self.graph.has_edge(source, destination):
             self.add_weight_to_edge(source, destination, weight)
         elif self.graph.has_edge(destination, source):
@@ -162,6 +164,8 @@ class IncrementalPersonalizedPageRank(object):
         :param destination: destination node of the edge
         :param weight: weight added to the edge
         """
+        if weight == 0:
+            return
         if self.graph.has_edge(source, destination):
             self.graph[source][destination]['weight'] += weight
             if self.graph[source][destination]['weight'] < 0:
@@ -213,8 +217,6 @@ class IncrementalPersonalizedPageRank(object):
             edge = (destination, source)
             self.graph.remove_edge(destination, source)
             self.removed_edges.append(edge)
-        else:
-            print "Edge not in Graph"
         return
 
     def add_node(self, node):
@@ -234,12 +236,19 @@ class IncrementalPersonalizedPageRank(object):
         :param node: node that is to be removed
         """
         if node in self.graph.nodes:
-            for edge in self.graph.neighbors(node):
-                self.removed_edges.append(edge)
+            for predecessor in self.graph.predecessors(node):
+                self.removed_edges.append((predecessor, node))
             self.graph.remove_node(node)
-        else:
-            print "node not in graph"
         return
+
+    """def update_graph(self, new_graph):
+        
+        Takes a modification of the current graph and updates the lists added_edges and removed_edges
+        :param new_graph: Modified version of the original graph
+        
+        old_edges = nx.get_edge_attributes(self.graph, 'weight').items()
+        new_edges = nx.get_edge_attributes(new_graph, 'weight').items()
+        for edge in list(set(new_edges) - set(old_edges)):"""
 
     def update_random_walks(self):
         """
@@ -255,7 +264,7 @@ class IncrementalPersonalizedPageRank(object):
                 del random_walk[random_walk.index(edge[0])+1:]
                 self.add_random_walk(random_walk)
 
-        for edge in reversed(self.removed_edges[:]):
+        for edge in reversed(self.removed_edges):
             self.removed_edges.remove(edge)
             random_walks_to_change = [random_walk for random_walk in self.random_walks if edge[0] in random_walk]
             for random_walk in random_walks_to_change:
