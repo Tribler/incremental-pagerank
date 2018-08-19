@@ -4,6 +4,7 @@ and edges representing the flow of data in between peers
 """
 import sqlite3
 import networkx as nx
+import copy
 
 
 class GraphReduction(object):
@@ -41,8 +42,7 @@ class GraphReduction(object):
         """
         conn = sqlite3.connect(self.path + self.file_name + ".db")
         cursor = conn.cursor()
-        cursor.execute("""SELECT * FROM multi_chain LIMIT 1000 OFFSET 1;""")
-        #cursor.execute("""SELECT * FROM multi_chain LIMIT str(self.closing_row) OFFSET str(self.opening_row);""")
+        cursor.execute("""SELECT * FROM multi_chain LIMIT 10000 OFFSET 1;""")
         transactions = cursor.fetchall()
         transactions = [list(transaction) for transaction in transactions]
         for i in range(len(transactions)):
@@ -56,21 +56,28 @@ class GraphReduction(object):
         graph = nx.DiGraph()
         requesters = set(transactions[i][0] for i in range(len(transactions)))
         responders = set(transactions[i][1] for i in range(len(transactions)))
-        nodes = requesters.union(responders)
-        edges = [(node_1, node_2) for node_1 in nodes for node_2 in nodes if node_1 != node_2]
-        edges = dict(zip(edges, [0]*len(edges)))
+        nodes = list(requesters.union(responders))
+        double_edges = [(node_1, node_2) for node_1 in nodes for node_2 in nodes if node_1 != node_2]
+        double_edges = dict(zip(double_edges, [0]*len(double_edges)))
         for transaction in transactions:
-            edges[(transaction[0], transaction[1])] += transaction[2] - transaction[3]
+            double_edges[(transaction[0], transaction[1])] += transaction[2] - transaction[3]
+
+        directed_edges = copy.copy(double_edges)
+
+        for node_1 in nodes:
+            for node_2 in list(set(nodes) - {node_1}):
+                directed_edges[(node_1, node_2)] -= double_edges[(node_2, node_1)]
+
+        directed_edges = dict(filter(lambda x: x[1] > 0, directed_edges.items())) #Returns all edges with positive edge weights
+        edges = []
+        for directed_edge in directed_edges.keys():
+            edges.append(directed_edge + (directed_edges[directed_edge],))
 
         graph.add_nodes_from(nodes)
+        graph.add_weighted_edges_from(edges)
+        return graph
 
-        for node_1 in list(nodes):
-            for node_2 in list(set(nodes) - {node_1}):
-                edges[(node_1, node_2)] -= edges[(node_2, node_1)]
-        for node_1 in list(nodes):
-            for node_2 in list(set(nodes) - {node_1}):
-                print edges[(node_1, node_2)] == -edges[(node_2, node_1)]
-        edges = dict(filter(lambda x: x[1] > 0, edges.items())) #Returns all edges with positive edge weights
+
 
 
 
