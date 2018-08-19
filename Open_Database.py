@@ -53,21 +53,27 @@ class GraphReduction(object):
         return transactions
 
     def generate_graph(self, transactions):
-        graph = nx.Digraph()
+        graph = nx.DiGraph()
         requesters = set(transactions[i][0] for i in range(len(transactions)))
         responders = set(transactions[i][1] for i in range(len(transactions)))
         nodes = requesters.union(responders)
-        edges = [(node_1, node_2) for node_1, node_2 in nodes if node_1 != node_2]
+        edges = [(node_1, node_2) for node_1 in nodes for node_2 in nodes if node_1 != node_2]
         edges = dict(zip(edges, [0]*len(edges)))
         for transaction in transactions:
             edges[(transaction[0], transaction[1])] += transaction[2] - transaction[3]
 
         graph.add_nodes_from(nodes)
-        graph.add_weighted_edges_from(edges)
+
+        for node_1 in list(nodes):
+            for node_2 in list(set(nodes) - {node_1}):
+                edges[(node_1, node_2)] -= edges[(node_2, node_1)]
+        for node_1 in list(nodes):
+            for node_2 in list(set(nodes) - {node_1}):
+                print edges[(node_1, node_2)] == -edges[(node_2, node_1)]
+        edges = dict(filter(lambda x: x[1] > 0, edges.items())) #Returns all edges with positive edge weights
 
 
 
-        graph.add_nodes_from(nodes)
 
 
 
