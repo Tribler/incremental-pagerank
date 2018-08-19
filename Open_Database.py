@@ -34,6 +34,8 @@ class GraphReduction(object):
         self.opening_row = opening_row
         self.closing_row = closing_row
         self.number_of_rows = self.closing_row - self.opening_row
+        self.blocks = []
+        self.graph = nx.DiGraph()
 
     def open_data_set(self):
         """
@@ -43,24 +45,23 @@ class GraphReduction(object):
         conn = sqlite3.connect(self.path + self.file_name + ".db")
         cursor = conn.cursor()
         cursor.execute("""SELECT * FROM multi_chain LIMIT 10000 OFFSET 1;""")
-        transactions = cursor.fetchall()
-        transactions = [list(transaction) for transaction in transactions]
-        for i in range(len(transactions)):
-            for j in list(set(range(len(transactions[i]))) - {2, 3, 4, 5, 6, 10, 11, 12, 16}):
-                transactions[i][j] = str(transactions[i][j]).encode('hex')
-        transactions = [tuple(transaction) for transaction in transactions]
+        self.blocks = cursor.fetchall()
+        self.blocks = [list(block) for block in self.blocks]
+        for i in range(len(self.blocks)):
+            for j in list(set(range(len(self.blocks[i]))) - {2, 3, 4, 5, 6, 10, 11, 12, 16}):
+                self.blocks[i][j] = str(self.blocks[i][j]).encode('hex')
+        self.blocks = [tuple(block) for block in self.blocks]
         conn.close()
-        return transactions
+        return
 
-    def generate_graph(self, transactions):
-        graph = nx.DiGraph()
-        requesters = set(transactions[i][0] for i in range(len(transactions)))
-        responders = set(transactions[i][1] for i in range(len(transactions)))
+    def generate_graph(self):
+        requesters = set(self.blocks[i][0] for i in range(len(self.blocks)))
+        responders = set(self.blocks[i][1] for i in range(len(self.blocks)))
         nodes = list(requesters.union(responders))
         double_edges = [(node_1, node_2) for node_1 in nodes for node_2 in nodes if node_1 != node_2]
         double_edges = dict(zip(double_edges, [0]*len(double_edges)))
-        for transaction in transactions:
-            double_edges[(transaction[0], transaction[1])] += transaction[2] - transaction[3]
+        for block in self.blocks:
+            double_edges[(block[0], block[1])] += block[2] - block[3]
 
         directed_edges = copy.copy(double_edges)
 
@@ -73,9 +74,10 @@ class GraphReduction(object):
         for directed_edge in directed_edges.keys():
             edges.append(directed_edge + (directed_edges[directed_edge],))
 
-        graph.add_nodes_from(nodes)
-        graph.add_weighted_edges_from(edges)
-        return graph
+        self.graph.add_nodes_from(nodes)
+        self.graph.add_weighted_edges_from(edges)
+        return
+
 
 
 

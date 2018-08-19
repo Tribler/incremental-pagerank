@@ -5,6 +5,7 @@ import unittest
 import networkx as nx
 import random
 import matplotlib.pyplot as plt
+import numpy
 
 from Page_Rank import IncrementalPersonalizedPageRank
 
@@ -162,7 +163,7 @@ class Tests(unittest.TestCase):
 
     def test_page_rank_5(self):
         self.graph = nx.DiGraph()
-        self.number_of_nodes = random.randint(1, 50)
+        self.number_of_nodes = random.randint(2, 10000)
         self.nodes = range(self.number_of_nodes)
         self.graph.add_nodes_from(self.nodes)
         for _ in range(2*self.number_of_nodes):
@@ -178,14 +179,19 @@ class Tests(unittest.TestCase):
         page_ranks = pr.compute_personalized_page_ranks()
         page_ranks_2 = nx.pagerank(pr.graph, alpha=0.95, personalization={0: 1},
                                    max_iter=500, weight='weight')
+        print "Random Walks: ", pr.random_walks
 
         print "Initial Page Ranks: ", "\n", page_ranks, "\n", page_ranks_2
+        #print numpy.linalg.norm(numpy.array(page_ranks.values()) - numpy.array(page_ranks_2.values()))
         for node in pr.graph.nodes:
             self.assertAlmostEqual(page_ranks[node], page_ranks_2[node], 1)
         nx.draw_circular(self.graph, with_labels=True)
-        plt.ion()
+        #plt.ion()
         plt.show()
-        plt.pause(5)
+        #plt.pause(5)
+
+        print "Initial Nodes :", self.graph.nodes
+        print "Initial Edges :", self.graph.edges
 
         c = random.randint(self.number_of_nodes//4, self.number_of_nodes//2)
         choices = ["Remove Edge / Add Edge", "Change Edge Weight", "Remove Node / Add Node"]
@@ -215,16 +221,20 @@ class Tests(unittest.TestCase):
                     pr.remove_node(node)
 
         nx.draw_circular(self.graph, with_labels=True)
-        plt.ion()
+        #plt.ion()
         plt.show()
-        plt.pause(5)
+        #plt.pause(5)
+        print "Updated Nodes :", self.graph.nodes
+        print "Updated Edges :", self.graph.edges
 
         pr.update_random_walks()
         new_page_ranks = pr.compute_personalized_page_ranks()
         new_page_ranks_2 = nx.pagerank(pr.graph, alpha=0.95, personalization={0: 1},
                                        max_iter=500, weight='weight')
+        print "New Random Walks: ", pr.random_walks
         print "New Page Ranks: ", "\n", new_page_ranks, "\n", new_page_ranks_2
-
+        #print numpy.linalg.norm(numpy.array(new_page_ranks.values()) - numpy.array(new_page_ranks_2.values()))
+        #print page_ranks.keys() == page_ranks_2.keys()
 
 if __name__ == '__main__':
     unittest.main()
