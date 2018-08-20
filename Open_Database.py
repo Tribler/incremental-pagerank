@@ -44,7 +44,7 @@ class GraphReduction(object):
         """
         conn = sqlite3.connect(self.path + self.file_name + ".db")
         cursor = conn.cursor()
-        cursor.execute("""SELECT * FROM multi_chain LIMIT 10000 OFFSET 1;""")
+        cursor.execute("""SELECT * FROM multi_chain;""")
         self.blocks = cursor.fetchall()
         self.blocks = [list(block) for block in self.blocks]
         for i in range(len(self.blocks)):

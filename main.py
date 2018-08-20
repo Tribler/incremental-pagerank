@@ -22,6 +22,6 @@ page_ranks_2 = nx.pagerank(gr.graph, alpha=0.95, personalization={node: 1},
                            max_iter=500, weight='weight')
 #print numpy.linalg.norm(numpy.array(page_ranks.values()) - numpy.array(page_ranks_2.values()))
 #print numpy.amax(numpy.array(page_ranks.values()) - numpy.array(page_ranks_2.values()))
-print page_ranks.keys() == page_ranks_2.keys()
+#print page_ranks.keys() == page_ranks_2.keys()
 #print max(page_ranks.values() - page_ranks_2.values())
 

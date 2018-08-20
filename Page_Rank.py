@@ -143,7 +143,7 @@ class IncrementalPersonalizedPageRank(object):
         :param destination: destination node
         :param weight: weight of the edge
         """
-        if weight == 0:
+        if weight == 0 or source not in self.graph or destination not in self.graph:
             return
         if self.graph.has_edge(source, destination):
             self.add_weight_to_edge(source, destination, weight)
@@ -237,18 +237,25 @@ class IncrementalPersonalizedPageRank(object):
         """
         if node in self.graph.nodes:
             for predecessor in self.graph.predecessors(node):
-                self.removed_edges.append((predecessor, node))
+                if (predecessor, node) not in self.removed_edges:
+                    self.removed_edges.append((predecessor, node))
+                if (predecessor, node) in self.added_edges:
+                    self.added_edges.remove((predecessor, node))
+            for successor in self.graph.successors(node):
+                if (node, successor) in self.added_edges:
+                    self.added_edges.remove((node, successor))
             self.graph.remove_node(node)
         return
 
-    """def update_graph(self, new_graph):
-        
+    def update_graph(self, new_graph):
+        """
         Takes a modification of the current graph and updates the lists added_edges and removed_edges
         :param new_graph: Modified version of the original graph
-        
+        """
         old_edges = nx.get_edge_attributes(self.graph, 'weight').items()
         new_edges = nx.get_edge_attributes(new_graph, 'weight').items()
-        for edge in list(set(new_edges) - set(old_edges)):"""
+        for edge in list(set(new_edges) - set(old_edges)):
+            self.add_edge(edge[0][0], edge[0][1], edge[1])
 
     def update_random_walks(self):
         """
