@@ -247,15 +247,15 @@ class IncrementalPersonalizedPageRank(object):
             self.graph.remove_node(node)
         return
 
-    def update_graph(self, new_graph):
-        """
+    """def update_graph(self, new_graph):
+        
         Takes a modification of the current graph and updates the lists added_edges and removed_edges
         :param new_graph: Modified version of the original graph
-        """
+        
         old_edges = nx.get_edge_attributes(self.graph, 'weight').items()
         new_edges = nx.get_edge_attributes(new_graph, 'weight').items()
         for edge in list(set(new_edges) - set(old_edges)):
-            self.add_edge(edge[0][0], edge[0][1], edge[1])
+            self.add_edge(edge[0][0], edge[0][1], edge[1])"""
 
     def update_random_walks(self):
         """
