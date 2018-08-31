@@ -40,55 +40,50 @@ class GraphReduction(object):
     def open_data_set(self):
         """
         Opens the multi chain data base file and selects the given rows from the multi_chain table
-        :return:
         """
         conn = sqlite3.connect(self.path + self.file_name + ".db")
         cursor = conn.cursor()
-        cursor.execute("""SELECT * FROM multi_chain LIMIT 100;""")
+        cursor.execute("""SELECT * FROM multi_chain LIMIT 500 OFFSET;""")  # Number of rows: 1328229
         self.blocks = cursor.fetchall()
-        number_of_blocks = len(self.blocks)
         self.blocks = [list(block) for block in self.blocks]
-        for i in xrange(number_of_blocks):  # xrange(len(self.blocks)):
-            for j in list(set(range(len(self.blocks[i]))) - {2, 3, 4, 5, 6, 10, 11, 12, 16}):  # list(set(range(len(self.blocks[i])))
+        for i in xrange(len(self.blocks)):
+            for j in iter(list(set(range(len(self.blocks[i]))) - {2, 3, 4, 5, 6, 10, 11, 12, 16})):  # list(set(range(len(self.blocks[i])))
                 self.blocks[i][j] = str(self.blocks[i][j]).encode('hex')
         self.blocks = [tuple(block) for block in self.blocks]
         conn.close()
         return
 
     def generate_graph(self):
+        """
+        Generates a graph from the multichain blocks. Each node corresponds to a public key. The edge weights
+        represent the net data flow in between two nodes
+        :return:
+        """
         requesters = set(self.blocks[i][0] for i in range(len(self.blocks)))
         responders = set(self.blocks[i][1] for i in range(len(self.blocks)))
         nodes = list(requesters.union(responders))
+
+        del responders
+        del requesters
+
         double_edges = [(node_1, node_2) for node_1 in nodes for node_2 in nodes if node_1 != node_2]
         double_edges = dict(zip(double_edges, [0]*len(double_edges)))
-        for block in self.blocks:
+        for block in iter(self.blocks):
             double_edges[(block[0], block[1])] += block[2] - block[3]
+            double_edges[(block[1], block[0])] += block[3] - block[2]
 
         directed_edges = copy.copy(double_edges)
 
-        for node_1 in nodes:
-            for node_2 in list(set(nodes) - {node_1}):
-                directed_edges[(node_1, node_2)] -= double_edges[(node_2, node_1)]
+        del double_edges
 
-        directed_edges = dict(filter(lambda x: x[1] > 0, directed_edges.items())) #Returns all edges with positive edge weights
+        directed_edges = dict(filter(lambda x: x[1] > 0, directed_edges.items())) # Returns all edges with positive edge weights
         edges = []
-        for directed_edge in directed_edges.keys():
+        for directed_edge in iter(directed_edges.keys()):
             edges.append(directed_edge + (directed_edges[directed_edge],))
 
         del directed_edges
-        del double_edges
 
         self.graph.add_nodes_from(nodes)
         self.graph.add_weighted_edges_from(edges)
+
         return
-
-
-
-
-
-
-
-
-
-
-

@@ -244,6 +244,8 @@ class IncrementalPersonalizedPageRank(object):
             for successor in self.graph.successors(node):
                 if (node, successor) in self.added_edges:
                     self.added_edges.remove((node, successor))
+                if (node, successor) not in self.removed_edges:
+                    self.removed_edges.append((node, successor))
             self.graph.remove_node(node)
         return
 

@@ -31,7 +31,7 @@ for _ in range(2 * number_of_nodes):
 nx.draw_circular(graph, node_size=30, with_labels=True)
 plt.show()
 
-"""while number_of_random_walks <= 600:
+while number_of_random_walks <= 600:
     number_of_random_walks += 200
     random_walk_length = 5
     while random_walk_length <= 100:
@@ -76,7 +76,6 @@ plt.title('Accuracy of Page Ranks')
 plt.ylabel('Euclidean Norm')
 plt.xlabel('Number of Random Walks')
 plt.show()
-"""
 
 difference = []
 reset_probabilities = [0.05, 0.1, 0.15, 0.3, 0.5, 0.7, 0.9]
