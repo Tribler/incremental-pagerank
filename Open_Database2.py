@@ -69,7 +69,12 @@ class GraphReduction2(object):
                     elif decode(str(block[1]))[1]["down"] - decode(str(block[1]))[1]["up"] < 0:
                         self.edges[(str(block[4]).encode('hex'), str(block[2]).encode('hex'))] = \
                             decode(str(block[1]))[1]["up"] - decode(str(block[1]))[1]["down"]
-
+                    if decode(str(block[1]))[1]["up"] - decode(str(block[1]))[1]["down"] >= 0:
+                        self.edges[(str(block[2]).encode('hex'), str(block[4]).encode('hex'))] = \
+                            decode(str(block[1]))[1]["up"] - decode(str(block[1]))[1]["down"]
+                    elif decode(str(block[1]))[1]["up"] - decode(str(block[1]))[1]["down"] < 0:
+                        self.edges[(str(block[4]).encode('hex'), str(block[2]).encode('hex'))] = \
+                            decode(str(block[1]))[1]["down"] - decode(str(block[1]))[1]["up"]
         self.nodes = list(self.nodes)
         self.edges = iter(zip(self.edges.keys(), self.edges.values()))
         self.edges = iter(edge[0] + (edge[1],) for edge in self.edges)
