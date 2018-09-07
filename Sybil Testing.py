@@ -14,7 +14,6 @@ import matplotlib.pyplot as plt
 import random
 import numpy as np
 from Page_Rank2 import IncrementalPersonalizedPageRank2
-from scipy import integrate
 import matplotlib.patches as mpatches
 import copy
 
