@@ -34,7 +34,7 @@ for _ in range(4*number_of_honest_nodes):
         weight = random.randint(1, 10)
         honest_region.add_weighted_edges_from([(node_1, node_2, weight)])
 
-number_of_sybil_nodes = 50
+number_of_sybil_nodes = 1000
 sybil_region = nx.DiGraph()
 sybil_nodes = range(number_of_honest_nodes, number_of_honest_nodes + number_of_sybil_nodes)
 sybil_region.add_nodes_from(sybil_nodes)
@@ -62,7 +62,7 @@ false_positives = []
 false_negatives = []
 for reset_probability in reset_probabilities:
     graph = copy.deepcopy(initial_graph)
-    for number_of_attack_edges in range(50):
+    for number_of_attack_edges in range(500):
         for _ in range(number_of_attack_edges):
             honest_node = random.choice(list(honest_region.nodes()))
             sybil_node = random.choice(list(sybil_region.nodes()))
@@ -87,12 +87,14 @@ for reset_probability in reset_probabilities:
         pr = IncrementalPersonalizedPageRank2(graph, 0, 200, reset_probability)
         pr.initial_random_walks()
         page_ranks = pr.compute_personalized_page_ranks()
-        page_ranks_list = sorted(page_ranks.iteritems(), key=lambda (k, v): (v, k), reverse=True)
+        truncated_page_ranks = {k: v for k, v in page_ranks.items() if v != 0}
+        page_ranks_list = sorted(truncated_page_ranks.iteritems(), key=lambda (k, v): (v, k), reverse=True)
+        print page_ranks_list
         ordered_nodes = list(zip(*page_ranks_list)[0])
 
         ROC_abscissa = []
         ROC_ordinate = []
-        for i in range(1, len(graph.nodes())+1):
+        for i in range(1, len(ordered_nodes)+1):
             positives = ordered_nodes[:i]  # Non Sybils
             negatives = ordered_nodes[i:]  # Sybils
             ROC_abscissa.append(len(set(positives).intersection(set(sybil_region.nodes()))) / len(sybil_region.nodes()))
@@ -138,10 +140,10 @@ plt.title("Sybil Resistance of Page Rank")
 plt.show()
 print false_negatives
 print len(false_negatives)
-plt.plot(range(20), false_negatives[:20], 'r',
-         range(20), false_negatives[20:40], 'g',
-         range(20), false_negatives[40:60], 'b',
-         range(20), false_negatives[60:80], 'y')
+plt.plot(range(50), false_negatives[:50], 'r',
+         range(50), false_negatives[50:100], 'g',
+         range(50), false_negatives[100:150], 'b',
+         range(50), false_negatives[150:200], 'y')
 red_patch = mpatches.Patch(color='red', label='Reset Probability 0.1')
 green_patch = mpatches.Patch(color='green', label='Reset Probability 0.3')
 blue_patch = mpatches.Patch(color='blue', label='Reset Probability 0.5')

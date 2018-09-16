@@ -1,5 +1,5 @@
 """
-In this code we run the IncrementalPersonalizedPageRank class on a randomly generated graph to compute the
+In this code we run the IncrementalPersonalizedPageRank2 class on a randomly generated graph to compute the
 personalized page rank values. We simultaneously the page rank method given in the networkx library and compare
 their values for different parameters.
 """
