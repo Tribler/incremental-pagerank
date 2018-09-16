@@ -102,18 +102,20 @@ for reset_probability in reset_probabilities:
         # plt.show()
 
         area_ROC.append(np.trapz(ROC_ordinate, ROC_abscissa))
-        false_positives.append(len(list(set(ordered_nodes[:number_of_honest_nodes]).intersection(set(sybil_nodes)))) / number_of_sybil_nodes)
-        false_negatives.append(len(list(set(ordered_nodes[number_of_honest_nodes:]).intersection(set(honest_nodes)))) / number_of_honest_nodes)
+        false_positives.append(len(list(set(ordered_nodes[:number_of_honest_nodes]).intersection(set(sybil_nodes)))) /
+                               number_of_sybil_nodes)
+        false_negatives.append(len(list(set(ordered_nodes[number_of_honest_nodes:]).intersection(set(honest_nodes)))) /
+                               number_of_honest_nodes)
 
 
 plt.plot(range(50), area_ROC[:50], 'r',
          range(50), area_ROC[50:100], 'g',
          range(50), area_ROC[100:150], 'b',
          range(50), area_ROC[150:200], 'y')
-red_patch = mpatches.Patch(color='red', label='Reset Probability 0.001')
-green_patch = mpatches.Patch(color='green', label='Reset Probability 0.005')
-blue_patch = mpatches.Patch(color='blue', label='Reset Probability 0.01')
-yellow_patch = mpatches.Patch(color='yellow', label='Reset Probability 0.05')
+red_patch = mpatches.Patch(color='red', label='Reset Probability 0.1')
+green_patch = mpatches.Patch(color='green', label='Reset Probability 0.3')
+blue_patch = mpatches.Patch(color='blue', label='Reset Probability 0.5')
+yellow_patch = mpatches.Patch(color='yellow', label='Reset Probability 0.7')
 plt.legend(handles=[red_patch, green_patch, blue_patch, yellow_patch])
 plt.xlabel("Number of Attack Edges")
 plt.ylabel("Area under ROC Curve")
@@ -125,10 +127,10 @@ plt.plot(range(50), false_positives[:50], 'r',
          range(50), false_positives[50:100], 'g',
          range(50), false_positives[100:150], 'b',
          range(50), false_positives[150:200], 'y')
-red_patch = mpatches.Patch(color='red', label='Reset Probability 0.001')
-green_patch = mpatches.Patch(color='green', label='Reset Probability 0.005')
-blue_patch = mpatches.Patch(color='blue', label='Reset Probability 0.01')
-yellow_patch = mpatches.Patch(color='yellow', label='Reset Probability 0.05')
+red_patch = mpatches.Patch(color='red', label='Reset Probability 0.1')
+green_patch = mpatches.Patch(color='green', label='Reset Probability 0.3')
+blue_patch = mpatches.Patch(color='blue', label='Reset Probability 0.5')
+yellow_patch = mpatches.Patch(color='yellow', label='Reset Probability 0.7')
 plt.legend(handles=[red_patch, green_patch, blue_patch, yellow_patch])
 plt.xlabel("Number of Attack Edges")
 plt.ylabel("Proportion of False Positives")
@@ -140,10 +142,10 @@ plt.plot(range(20), false_negatives[:20], 'r',
          range(20), false_negatives[20:40], 'g',
          range(20), false_negatives[40:60], 'b',
          range(20), false_negatives[60:80], 'y')
-red_patch = mpatches.Patch(color='red', label='Reset Probability 0.001')
-green_patch = mpatches.Patch(color='green', label='Reset Probability 0.005')
-blue_patch = mpatches.Patch(color='blue', label='Reset Probability 0.01')
-yellow_patch = mpatches.Patch(color='yellow', label='Reset Probability 0.05')
+red_patch = mpatches.Patch(color='red', label='Reset Probability 0.1')
+green_patch = mpatches.Patch(color='green', label='Reset Probability 0.3')
+blue_patch = mpatches.Patch(color='blue', label='Reset Probability 0.5')
+yellow_patch = mpatches.Patch(color='yellow', label='Reset Probability 0.7')
 plt.legend(handles=[red_patch, green_patch, blue_patch, yellow_patch])
 plt.xlabel("Number of Attack Edges")
 plt.ylabel("Proportion of False Negatives")
