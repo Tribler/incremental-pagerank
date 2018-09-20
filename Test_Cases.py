@@ -91,7 +91,7 @@ class Tests(unittest.TestCase):
         self.assertEqual(new_page_ranks['d'], 0)
         self.assertEqual(len(pr.random_walks), 200)
         # for walk in pr.random_walks:
-            #self.assertEqual(len(walk), 100)
+        # self.assertEqual(len(walk), 100)
         for node in self.graph.nodes:
             self.assertAlmostEqual(new_page_ranks[node], new_page_ranks_2[node], 2)
 
@@ -178,20 +178,18 @@ class Tests(unittest.TestCase):
             else:
                 weight = random.randint(0, 10)
                 self.graph.add_weighted_edges_from([(node_1, node_2, weight)])
-        # pr = IncrementalPersonalizedPageRank(self.graph, 0, 200, 0.05, 50)
-        pr = IncrementalPersonalizedPageRank2(self.graph, 0, 200, 0.05)
+        pr = IncrementalPersonalizedPageRank2(self.graph, 0, 500, 0.3)
         pr.initial_random_walks()
         page_ranks = pr.compute_personalized_page_ranks()
-        page_ranks_2 = nx.pagerank(pr.graph, alpha=0.95, personalization={0: 1},
-                                   max_iter=500, weight='weight')
+        page_ranks_2 = nx.pagerank(pr.graph, alpha=0.7, personalization={0: 1},
+                                   max_iter=1000, weight='weight')
+
         # nx.draw_circular(pr.graph, with_labels=True, node_size=20, with_edge_labels=True)
         # plt.show()
-        print "Random Walks: ", pr.random_walks
-
-        print "Initial Page Ranks: ", "\n", page_ranks, "\n", page_ranks_2
-        # print numpy.linalg.norm(numpy.array(page_ranks.values()) - numpy.array(page_ranks_2.values()))
-        for node in pr.graph.nodes:
-            self.assertAlmostEqual(page_ranks[node], page_ranks_2[node], 1)
+        print self.number_of_nodes
+        diff = numpy.linalg.norm(numpy.array(page_ranks.values()) - numpy.array(page_ranks_2.values())) / \
+            numpy.linalg.norm(numpy.array(page_ranks_2.values()))
+        self.assertAlmostEqual(diff, 0, 1)
 
         c = random.randint(self.number_of_nodes//4, self.number_of_nodes//2)
         choices = ["Remove Edge / Add Edge", "Change Edge Weight", "Remove Node / Add Node"]
@@ -225,13 +223,12 @@ class Tests(unittest.TestCase):
 
         pr.update_random_walks()
         new_page_ranks = pr.compute_personalized_page_ranks()
-        new_page_ranks_2 = nx.pagerank(pr.graph, alpha=0.95, personalization={0: 1},
-                                       max_iter=500, weight='weight')
-        print "New Random Walks: ", pr.random_walks
-        print "New Page Ranks: ", "\n", new_page_ranks, "\n", new_page_ranks_2
-        # print numpy.linalg.norm(numpy.array(new_page_ranks.values()) - numpy.array(new_page_ranks_2.values()))
-        for node in pr.graph.nodes:
-            self.assertAlmostEqual(new_page_ranks[node], new_page_ranks_2[node], 1)
+        new_page_ranks_2 = nx.pagerank(pr.graph, alpha=0.7, personalization={0: 1},
+                                       max_iter=1000, weight='weight')
+        print self.number_of_nodes
+        diff = numpy.linalg.norm(numpy.array(new_page_ranks.values()) - numpy.array(new_page_ranks_2.values())) / \
+            numpy.linalg.norm(numpy.array(new_page_ranks_2.values()))
+        self.assertAlmostEqual(diff, 0, delta=0.06)
 
 
 if __name__ == '__main__':
