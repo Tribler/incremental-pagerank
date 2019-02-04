@@ -1,5 +1,5 @@
 """
-In this code we run the IncrementalPersonalizedPageRank class on a randomly generated graph to compute the
+In this code we run the IncrementalPersonalizedPageRank2 class on a randomly generated graph to compute the
 personalized page rank values. We simultaneously the page rank method given in the networkx library and compare
 their values for different parameters.
 """
@@ -8,8 +8,8 @@ import networkx as nx
 import random
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
-from Page_Rank import IncrementalPersonalizedPageRank
 from Page_Rank2 import IncrementalPersonalizedPageRank2
+from Page_Rank import IncrementalPersonalizedPageRank
 import numpy as np
 
 random.seed(1)
@@ -22,12 +22,12 @@ random_walk_length = 5
 difference = list()
 
 for _ in range(2 * number_of_nodes):
-    node_1 = random.choice(list(graph.nodes))
-    node_2 = random.choice(list(set(graph.nodes) - {node_1}))
+    node_1 = random.choice(list(graph.nodes()))
+    node_2 = random.choice(list(set(graph.nodes()) - {node_1}))
     if graph.has_edge(node_1, node_2) or graph.has_edge(node_2, node_1):
         continue
     else:
-        weight = random.randint(0, 10)
+        weight = random.randint(1, 10)
         graph.add_weighted_edges_from([(node_1, node_2, weight)])
 nx.draw_circular(graph, node_size=30, with_labels=True)
 plt.show()
@@ -45,6 +45,7 @@ while number_of_random_walks <= 600:
 
         difference.append(np.linalg.norm(np.array(page_ranks.values()) - np.array(page_ranks_2.values())) /
                           np.linalg.norm(page_ranks_2.values()))
+
 plt.plot(range(6, 101), difference[0:95], 'r', range(6, 101), difference[96:191], 'g',
          range(6, 101), difference[192:287], 'y')
 red_patch = mpatches.Patch(color='red', label='210 Random Walks')
